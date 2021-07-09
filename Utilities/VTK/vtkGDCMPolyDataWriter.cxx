@@ -685,6 +685,18 @@ void vtkGDCMPolyDataWriter::InitializeRTStructSet(vtkStdString inDirectory,
     gdcmWarningMacro("No CT or MR Images loaded, throwing.");
     return;// false;
     }
+  //Get the CT Z spacing
+  Directory::FilenamesType theCTFilenames =
+    gdcm::DirectoryHelper::GetFilenamesFromSeriesUIDs(inDirectory, theCTSeries[0]);
+  IPPSorter sorter;
+  sorter.SetComputeZSpacing(true);
+  sorter.SetZSpacingTolerance(0.000001);
+  if (!sorter.Sort(theCTFilenames))
+    {
+    gdcmWarningMacro("Unable to sort Image Files.");
+    return;// false;
+    }
+  double theCTZSpacing = sorter.GetZSpacing();
 
   //now, armed with this set of images, we can begin to properly construct the RTStructureSet
   vtkRTStructSetProperties* theRTStruct = RTStructSetProperties;//initially, this function was a static construction
@@ -788,7 +800,7 @@ void vtkGDCMPolyDataWriter::InitializeRTStructSet(vtkStdString inDirectory,
       pts->GetPoint(indx[0],v);
       double theZ = v[2];
       std::string theSOPInstance =
-        DirectoryHelper::RetrieveSOPInstanceUIDFromZPosition(theZ, theCTDataSets);
+        DirectoryHelper::RetrieveSOPInstanceUIDFromZPosition(theZ, theCTDataSets, theCTZSpacing);
       //j is correct here, because it's adding, as in there's an internal vector
       //that's growing.
       gdcmDebugMacro("SOP Instance for plane " << theZ << " is " << theSOPInstance);

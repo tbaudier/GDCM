@@ -59,8 +59,10 @@ public:
 
   //When writing RTStructs, each contour will have z position defined.
   //use that z position to determine the SOPInstanceUID for that plane.
+  //SOPInstanceUID is determined from inDS and its corresponding ZSpacing (eg: computed from IPPSorter::GetZSpacing())
   static std::string RetrieveSOPInstanceUIDFromZPosition(double inZPos,
-    const std::vector<DataSet>& inDS);
+    const std::vector<DataSet>& inDS,
+    const double theCTZSpacing);
 
   //When writing RTStructs, the frame of reference is done by planes to start with
   static std::string RetrieveSOPInstanceUIDFromIndex(int inIndex,
